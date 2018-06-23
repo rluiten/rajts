@@ -3,59 +3,25 @@ import counter, {
   IMessage as ICounterMessage,
   IState as ICounterState
 } from './counter'
-import { DispatchFunc, INext, IProgram } from './raj'
-
-// init's maybe rename
-const initCounterState = counter.init.state
-const initCounterEffect = counter.init.effect
+import { Dispatch, Effect, INext, IProgram } from './raj'
 
 interface IState {
-  counterState: ICounterState
+  counter: ICounterState
 }
 
 interface IMessage {
   data: ICounterMessage
-  type: 'counterMessage' // string
-}
-
-const initEffect = initCounterEffect
-  ? (dispatch: DispatchFunc<IMessage>) => {
-      initCounterEffect(data => {
-        dispatch({
-          data,
-          type: 'counterMessage'
-        })
-      })
-    }
-  : undefined
-
-const init: INext<IState, IMessage> = {
-  effect: initEffect,
-  state: {
-    counterState: initCounterState
-  }
+  type: 'counterMessage'
 }
 
 const counternest: IProgram<IState, IMessage> = {
-  init,
-  update(message, state) {
-    if (message.type === 'counterMessage') {
-      const result = counter.update(message.data, state.counterState)
-      const newState = { counterState: result.state }
-      const effect = result.effect
-        ? (dispatch: DispatchFunc<IMessage>) => {
-            // must check set again inside function
-            if (result.effect) {
-              result.effect(m1 => {
-                dispatch({
-                  data: m1,
-                  type: 'counterMessage'
-                })
-              })
-            }
-          }
-        : undefined
-      return { state: newState, effect }
+  init: {
+    effect: wrapEffect(counter.init.effect),
+    state: { counter: counter.init.state }
+  },
+  update({ type, data }, state) {
+    if (type === 'counterMessage') {
+      return wrapNext(counter.update(data, state.counter))
     }
     return { state }
   },
@@ -63,15 +29,26 @@ const counternest: IProgram<IState, IMessage> = {
     return (
       <div>
         <p>This is the root program.</p>
-        {counter.view(state.counterState, message => {
-          dispatch({
-            data: message,
-            type: 'counterMessage'
-          })
+        {counter.view(state.counter, data => {
+          dispatch({ data, type: 'counterMessage' })
         })}
       </div>
     )
   }
+}
+
+function wrapEffect(effect: Effect<ICounterMessage> | undefined) {
+  return effect
+    ? (dispatch: Dispatch<IMessage>) => {
+        effect(data => {
+          dispatch({ data, type: 'counterMessage' })
+        })
+      }
+    : undefined
+}
+
+function wrapNext({ state, effect }: INext<ICounterState, ICounterMessage>) {
+  return { state: { counter: state }, effect: wrapEffect(effect) }
 }
 
 export default counternest

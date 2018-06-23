@@ -10,11 +10,19 @@
  *
  * Formatting with prettier semi: false, singleQuote: true.
  */
-export type DispatchFunc<TMessage> = (message?: TMessage) => void
 
-export type Effect<TMessage> = (dispatch: DispatchFunc<TMessage>) => void
+/**
+ * Dispatch function to send messages
+ */
+export type Dispatch<TMessage> = (message?: TMessage) => void
 
-interface INext<TState, TMessage> {
+export type Effect<TMessage> = (dispatch: Dispatch<TMessage>) => void
+
+/**
+ * The result of update next state and maybe effect,
+ * TODO use maybe ?
+ */
+export interface INext<TState, TMessage> {
   state: TState
   effect?: Effect<TMessage>
 }
@@ -22,7 +30,7 @@ interface INext<TState, TMessage> {
 export interface IProgram<TState, TMessage> {
   init: INext<TState, TMessage>
   update: (message: TMessage, state: TState) => INext<TState, TMessage>
-  view: (state: TState, dispatch: DispatchFunc<TMessage>) => void
+  view: (state: TState, dispatch: Dispatch<TMessage>) => void
   done?: (state: TState) => void
 }
 

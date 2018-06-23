@@ -1,4 +1,4 @@
-import { DispatchFunc, IProgram, runtime } from './raj'
+import { Dispatch, IProgram, runtime } from './raj'
 
 /**
  * Usage example
@@ -6,7 +6,7 @@ import { DispatchFunc, IProgram, runtime } from './raj'
  */
 type State = number
 
-export function effect(dispatch: DispatchFunc<string>) {
+export function effect(dispatch: Dispatch<string>) {
   setTimeout(() => dispatch('beep'), 1000)
 }
 
@@ -24,5 +24,5 @@ const program: IProgram<State, string> = {
   }
 }
 
-console.log({ program })
+// console.log({ program })
 /* const endProgram =  */ runtime(program)
