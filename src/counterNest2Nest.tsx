@@ -24,11 +24,6 @@ const counter2: MessageAdapter = data => ({ data, kind: 'counter2' })
 
 const init = counterNest.init
 
-const initCounterNest2NestEffect = (dispatch: Dispatch<IMessage>) => {
-  dispatchEffect(dispatch, init.effect, counter1)
-  dispatchEffect(dispatch, init.effect, counter2)
-}
-
 const styleBox = {
   border: '1px black solid',
   margin: '8px',
@@ -37,7 +32,10 @@ const styleBox = {
 
 const counterNest2Nest: IProgram<IState, IMessage, ReactView> = {
   init: {
-    effect: initCounterNest2NestEffect,
+    effect: (dispatch: Dispatch<IMessage>) => {
+      dispatchEffect(dispatch, init.effect, counter1)
+      dispatchEffect(dispatch, init.effect, counter2)
+    },
     state: {
       counter1: init.state,
       counter2: init.state
