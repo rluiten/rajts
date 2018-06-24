@@ -23,6 +23,7 @@ Some changes to raj structure were introduced moving to typescript
   - Default create react app typescript errors on inline lambda's.
 - The types mean the minimum form of a program is a bit larger than javascript
   - see `raj.spec.ts` test "runtime() minimal program state" for an example.
+- raj-react Component not a parameter just accesses React.Component directly.
 
 There is an though experiment in moving to use an algebraic data type in raj instead
 of the nullable effect in the INext interface.

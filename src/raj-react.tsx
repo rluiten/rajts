@@ -1,9 +1,3 @@
-//
-// Changes from raj-react
-// 1. Added types
-// 2. Component not a parameter just access React.Component
-//
-
 import * as React from 'react'
 import { Dispatch, IProgram, runtime, View } from './raj'
 

@@ -103,7 +103,6 @@ test('runtime() should only call done() once', asyncDone => {
     update: (_message, state) => ({ state }),
     view: () => undefined,
     done(state) {
-      console.log('done', state)
       if (initialCall) {
         initialCall = false
         asyncDone()
