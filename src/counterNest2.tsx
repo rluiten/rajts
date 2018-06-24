@@ -162,6 +162,7 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
         {state.counters.map((counterState, index) => (
           <div key={index}>
             <table>
+              <tbody>
               <tr>
                 <td>Index {index} </td>
                 <td>
@@ -170,6 +171,7 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
                   )}
                 </td>
               </tr>
+              </tbody>
             </table>
           </div>
         ))}
