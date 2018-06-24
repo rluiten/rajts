@@ -35,3 +35,10 @@ import counterNest2, {
 } from './counterNest2'
 const CounterNest2 = program<{}, ICN2State, ICN2Message>(props => counterNest2)
 ReactDOM.render(<CounterNest2 />, document.getElementById('counter-nest2'))
+
+import counterNest2Nest, {
+  IMessage as ICN2NMessage,
+  IState as ICN2NState
+} from './counterNest2Nest'
+const CounterNest2Nest = program<{}, ICN2NState, ICN2NMessage>(props => counterNest2Nest)
+ReactDOM.render(<CounterNest2Nest />, document.getElementById('counter-nest2nest'))

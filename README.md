@@ -37,6 +37,9 @@ Usage of raj in typescript
   - CounterComponent.tsx
 - counterNest.tsx
 - counterNest2.tsx
+- counterNest2Nest.tsx
+  - This one shows 3 layers of raj program.
+  - counterNest2Nest -> counterNest2 -> counter
 
 Most of the original create react app with typescript has not been removed.
 

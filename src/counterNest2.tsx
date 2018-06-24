@@ -4,7 +4,7 @@ import counter, {
   IState as ICounterState
 } from './counter'
 import { Dispatch, Effect, INext, IProgram } from './raj'
-import { mapEffect } from './raj-compose'
+import { dispatchEffect, mapEffect } from './raj-compose'
 import { ReactView } from './raj-react'
 
 /**
@@ -77,14 +77,8 @@ const counterInit = counter.init
  * Initialise each contained program.
  */
 const initCounterNestEffect = (dispatch: Dispatch<IMessage>) => {
-  const counter1Effect = mapEffect(counterInit.effect, counterMessage1)
-  if (counter1Effect) {
-    counter1Effect(dispatch)
-  }
-  const counter2Effect = mapEffect(counterInit.effect, counterMessage2)
-  if (counter2Effect) {
-    counter2Effect(dispatch)
-  }
+  dispatchEffect(dispatch, counterInit.effect, counterMessage1)
+  dispatchEffect(dispatch, counterInit.effect, counterMessage2)
   // init state of counters is empty at the moment so nothing to do here
 }
 
@@ -167,9 +161,16 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
         <p>The list of counters.</p>
         {state.counters.map((counterState, index) => (
           <div key={index}>
-            {counter.view(counterState, message =>
-              dispatch(countersMessage(index)(message))
-            )}
+            <table>
+              <tr>
+                <td>Index {index} </td>
+                <td>
+                  {counter.view(counterState, message =>
+                    dispatch(countersMessage(index)(message))
+                  )}
+                </td>
+              </tr>
+            </table>
           </div>
         ))}
       </div>

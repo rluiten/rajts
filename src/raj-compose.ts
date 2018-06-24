@@ -10,3 +10,14 @@ export function mapEffect<TIn, TOut>(
         effect(message => dispatch(map(message)))
       }
 }
+
+export function dispatchEffect<TMessageIn, TMessageOut>(
+  dispatch: Dispatch<TMessageOut>,
+  effect: Effect<TMessageIn> | undefined,
+  adapter: (m: TMessageIn) => TMessageOut
+) {
+  const newEffect = mapEffect(effect, adapter)
+  if (newEffect) {
+    newEffect(dispatch)
+  }
+}
