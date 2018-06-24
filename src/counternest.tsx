@@ -1,27 +1,45 @@
 import * as React from 'react'
 import counter, {
   IMessage as ICounterMessage,
+  initWithCount,
+  isCountHigh,
   IState as ICounterState
 } from './counter'
-import { Dispatch, Effect, INext, IProgram } from './raj'
+import { IProgram } from './raj'
+import { mapEffect } from './raj-compose'
+import { ReactView } from './raj-react'
 
-interface IState {
+export interface IState {
   counter: ICounterState
 }
 
-interface IMessage {
+export interface IMessage {
   data: ICounterMessage
   type: 'counterMessage'
 }
 
-const counternest: IProgram<IState, IMessage> = {
+const counterMessage = (message: ICounterMessage): IMessage => ({
+  data: message,
+  type: 'counterMessage'
+})
+
+const counterInit = initWithCount(98)
+
+const counterNest: IProgram<IState, IMessage, ReactView> = {
   init: {
-    effect: wrapEffect(counter.init.effect),
-    state: { counter: counter.init.state }
+    effect: mapEffect(counterInit.effect, counterMessage),
+    state: { counter: counterInit.state }
   },
   update({ type, data }, state) {
     if (type === 'counterMessage') {
-      return wrapNext(counter.update(data, state.counter))
+      const result = counter.update(data, state.counter)
+      if (isCountHigh(result.state)) {
+        console.log('to high')
+      }
+      return {
+        effect: mapEffect(result.effect, counterMessage),
+        state: { ...state, counter: result.state }
+      }
     }
     return { state }
   },
@@ -29,26 +47,12 @@ const counternest: IProgram<IState, IMessage> = {
     return (
       <div>
         <p>This is the root program.</p>
-        {counter.view(state.counter, data => {
-          dispatch({ data, type: 'counterMessage' })
+        {counter.view(state.counter, message => {
+          dispatch(counterMessage(message))
         })}
       </div>
     )
   }
 }
 
-function wrapEffect(effect: Effect<ICounterMessage> | undefined) {
-  return effect
-    ? (dispatch: Dispatch<IMessage>) => {
-        effect(data => {
-          dispatch({ data, type: 'counterMessage' })
-        })
-      }
-    : undefined
-}
-
-function wrapNext({ state, effect }: INext<ICounterState, ICounterMessage>) {
-  return { state: { counter: state }, effect: wrapEffect(effect) }
-}
-
-export default counternest
+export default counterNest

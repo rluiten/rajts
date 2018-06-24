@@ -28,10 +28,10 @@ test('runtime() should call view() after dispatch', asyncDone => {
       view: (state, dispatch) => {
         viewCount++
         if (state === 'init') {
-          return dispatch('next')
+          dispatch('next')
         }
         if (state === 'next') {
-          return dispatch('done')
+          dispatch('done')
         }
         if (state === 'done') {
           resolve()
@@ -56,7 +56,7 @@ test('runtime() should call done() when killed', asyncDone => {
     },
     init: { state: initialState },
     update: (_message, state) => ({ state }),
-    view: () => void 0
+    view: () => undefined
   })
 
   kill()
@@ -72,7 +72,7 @@ test('runtime() should not call update/view if killed', asyncDone => {
     init: {
       effect: dispatch =>
         setTimeout(() => {
-          dispatch()
+          dispatch(undefined)
           asyncDone()
         }, 10),
       state: initialState
@@ -84,7 +84,6 @@ test('runtime() should not call update/view if killed', asyncDone => {
     view() {
       if (initialRender) {
         initialRender = false
-        // expect(true).toBe(true);
         return
       }
 
@@ -102,7 +101,7 @@ test('runtime() should only call done() once', asyncDone => {
   const kill = runtime({
     init: { state: 0 },
     update: (_message, state) => ({ state }),
-    view: () => void 0,
+    view: () => undefined,
     done(state) {
       console.log('done', state)
       if (initialCall) {
@@ -122,7 +121,7 @@ test('runtime() minimal program state', asyncDone => {
   runtime({
     init: { state: 0 },
     update: (_message, state) => ({ state }),
-    view: () => void 0
+    view: () => undefined
   })
   asyncDone()
 })
@@ -148,7 +147,7 @@ test('runtime() with contrived update with more types possible', asyncDone => {
       }
       return { state: { count: state.count + 1, message: state.message } }
     },
-    view: () => void 0
+    view: () => undefined
   })
   asyncDone()
 })

@@ -1,21 +1,28 @@
-// changes from raj-react
+//
+// Changes from raj-react
 // 1. Added types
-// 2. Component not a parameter just access React, not sure if bad consequence.
+// 2. Component not a parameter just access React.Component
+//
 
 import * as React from 'react'
-import { IProgram, runtime } from './raj'
+import { Dispatch, IProgram, runtime, View } from './raj'
+
+/**
+ * Use this when creating raj programs using raj-react.
+ */
+export type ReactView = JSX.Element | null
 
 export function program<TProps, TState, TMessage>(
-  createApp: (props: TProps) => IProgram<TState, TMessage>
+  createApp: (props: TProps) => IProgram<TState, TMessage, ReactView>
 ) {
-  interface IWrapperState {
+  interface IRajReactState {
     state: TState | undefined
   }
 
-  return class RajProgram extends React.Component<TProps, IWrapperState> {
-    private _view: any
-    private _killProgram: any
-    private _dispatch: any
+  return class RajProgram extends React.Component<TProps, IRajReactState> {
+    private _view: View<TState, TMessage, ReactView>
+    private _killProgram: (() => void) | undefined
+    private _dispatch: Dispatch<TMessage>
 
     constructor(props: any, ctx: any) {
       super(props, ctx)
@@ -30,6 +37,7 @@ export function program<TProps, TState, TMessage>(
         view: (state, dispatch) => {
           this._dispatch = dispatch
           this.setState(() => ({ state }))
+          return null
         }
       })
     }
@@ -42,7 +50,17 @@ export function program<TProps, TState, TMessage>(
     }
 
     public render() {
-      return this._view ? this._view(this.state.state, this._dispatch) : null
+      if (process.env.NODE_ENV === 'development') {
+        if (process.env.REACT_APP_TRACE_RAJ_REACT_RENDER_STATE === 'yes') {
+          console.log('raj-react render state', JSON.stringify(this.state))
+        }
+      }
+      // State may not be set yet on first render() call so check it
+      return this._view
+        ? this.state.state
+          ? this._view(this.state.state, this._dispatch)
+          : null
+        : null
     }
   }
 }

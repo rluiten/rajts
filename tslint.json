@@ -3,9 +3,7 @@
   "rules": {
     "no-var-keyword": true,
     "no-console": false,
-    "variable-name": ["allow-leading-underscore"],
-    "jsx-no-lambda": false,
-    "no-var-requires": false
+    "variable-name": ["allow-leading-underscore"]
   },
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]

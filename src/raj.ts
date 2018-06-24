@@ -14,36 +14,55 @@
 /**
  * Dispatch function to send messages
  */
-export type Dispatch<TMessage> = (message?: TMessage) => void
+export type Dispatch<TMessage> = (message: TMessage) => void
 
 export type Effect<TMessage> = (dispatch: Dispatch<TMessage>) => void
 
 /**
  * The result of update next state and maybe effect,
- * TODO use maybe ?
  */
 export interface INext<TState, TMessage> {
   state: TState
   effect?: Effect<TMessage>
 }
 
-export interface IProgram<TState, TMessage> {
+/**
+ * You must set TView when working with a specific view library
+ * Example in React TView would be `JSX.Element | null` which is defined as ReactView in raj-react.
+ */
+export type View<TState, TMessage, TView = void> = (
+  state: TState,
+  dispatch: Dispatch<TMessage>
+) => TView
+
+/**
+ * TView generic parameter is for view library independence.
+ *
+ * You must set TView when working with a specific view library
+ * Example in React TView would be `JSX.Element | null` which is defined as ReactView in raj-react.
+ */
+export interface IProgram<TState, TMessage, TView = void> {
   init: INext<TState, TMessage>
   update: (message: TMessage, state: TState) => INext<TState, TMessage>
-  view: (state: TState, dispatch: Dispatch<TMessage>) => void
+  view: View<TState, TMessage, TView>
   done?: (state: TState) => void
 }
 
-export function runtime<TState, TMessage>({
+export function runtime<TState, TMessage = void, TView = void>({
   init,
   done,
   update,
   view
-}: IProgram<TState, TMessage>) {
+}: IProgram<TState, TMessage, TView>) {
   let state: TState
   let isRunning = true
 
   function dispatch(message: TMessage) {
+    if (process.env.NODE_ENV === 'development') {
+      if (process.env.REACT_APP_TRACE_DISPATCH === 'yes') {
+        console.log('raj dispatch', JSON.stringify(message))
+      }
+    }
     if (isRunning) {
       change(update(message, state))
     }
@@ -71,10 +90,13 @@ export function runtime<TState, TMessage>({
 }
 
 //
-// hmm do i want to use a class definition ? Hmm.
-
-// build Algebraic Data Type for state effect model.
-// will make lib code bigger, and calling code bigger?
+// Consider a class definition, instead of object with fields any benefits ?
+// maybe benefit is can define local helper methods on class for something like
+// this.increment handler stuff.
+//
+// Consider Algebraic Data Type for state effect model.
+// will make lib code bigger, and code more complex I believe at the moment
+//
 interface IState<TState> {
   kind: 'state'
   state: TState
