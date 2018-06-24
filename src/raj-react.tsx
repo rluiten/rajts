@@ -55,9 +55,11 @@ export function program<TProps, TState, TMessage>(
           console.log('raj-react render state', JSON.stringify(this.state))
         }
       }
-      // State may not be set yet on first render() call so check it
+      // State may not be set yet on first render() call so check state set,
+      // typescript raises the risk so just check it.
+      // It appears by the time _view is set so is state.
       return this._view
-        ? this.state.state
+        ? this.state.state !== undefined
           ? this._view(this.state.state, this._dispatch)
           : null
         : null

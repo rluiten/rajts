@@ -1,16 +1,6 @@
 /**
- * Differences from raj 1.0.0.
- *
- * The result of update is now object of { state, effect } not an array to make
- * type mapping a bit simpler.
- * The types mean the minimum form of a program is a bit larger than javascript
- * see test "runtime() minimal program state for an example.
- *
- * Considering if algebraic type for result of update() is worth it.
- *
- * Formatting with prettier semi: false, singleQuote: true.
+ * Typescript version of raj https://github.com/andrejewski/raj.
  */
-
 /**
  * Dispatch function to send messages
  */
@@ -19,7 +9,7 @@ export type Dispatch<TMessage> = (message: TMessage) => void
 export type Effect<TMessage> = (dispatch: Dispatch<TMessage>) => void
 
 /**
- * The result of update next state and maybe effect,
+ * The result of update next state and maybe effect.
  */
 export interface INext<TState, TMessage> {
   state: TState
@@ -27,7 +17,7 @@ export interface INext<TState, TMessage> {
 }
 
 /**
- * You must set TView when working with a specific view library
+ * You must set TView when working with a specific view library.
  * Example in React TView would be `JSX.Element | null` which is defined as ReactView in raj-react.
  */
 export type View<TState, TMessage, TView = void> = (
@@ -38,7 +28,7 @@ export type View<TState, TMessage, TView = void> = (
 /**
  * TView generic parameter is for view library independence.
  *
- * You must set TView when working with a specific view library
+ * You will need to set TView when working with a specific view library.
  * Example in React TView would be `JSX.Element | null` which is defined as ReactView in raj-react.
  */
 export interface IProgram<TState, TMessage, TView = void> {

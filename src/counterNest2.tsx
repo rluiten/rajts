@@ -155,7 +155,7 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
   view(state, dispatch) {
     return (
       <div>
-        <p>This is the root program.</p>
+        <p>This is the counterNest2 program.</p>
         <p>First counter is a counter.</p>
         {counter.view(state.counter1, message =>
           dispatch(counterMessage1(message))

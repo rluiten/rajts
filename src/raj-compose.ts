@@ -1,4 +1,4 @@
-import { Dispatch, Effect /* , INext, IProgram */ } from './raj'
+import { Dispatch, Effect } from './raj'
 
 export function mapEffect<TIn, TOut>(
   effect: Effect<TIn> | undefined,

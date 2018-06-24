@@ -1,7 +1,8 @@
 {
-  "name": "rajts1",
-  "version": "0.1.0",
+  "name": "rajts",
+  "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "prettier": {
     "singleQuote": true,
     "semi": false
@@ -12,7 +13,7 @@
     "react-scripts-ts": "2.16.0"
   },
   "scripts": {
-    "start": "set BROWSER=none&&set CREATE_REACT_APP_TRACE_DISPATCH=yes&&react-scripts-ts start",
+    "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject"

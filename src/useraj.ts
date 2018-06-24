@@ -6,15 +6,15 @@ import { Dispatch, IProgram, runtime } from './raj'
  * The dispatch(undefined) is a bit weird be nice to allow ().
  * but can deal with it for now.
  */
-type State = number
-type Message = string | undefined
+type IState = number
+type IMessage = string | undefined
 
-export function effect(dispatch: Dispatch<Message>) {
+export function effect(dispatch: Dispatch<IMessage>) {
   setTimeout(() => dispatch('beep'), 1000)
 }
 
 // todo check using Symbol for message type ?
-const program: IProgram<State, Message> = {
+const program: IProgram<IState, IMessage> = {
   init: { state: 0 },
   update(_message, state) {
     return { state: state + 1 } // Increment the state
