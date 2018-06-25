@@ -92,6 +92,7 @@ function doNormalEffectAndAddCounter({
 const counterNest: IProgram<IState, IMessage, ReactView> = {
   init: {
     effect: batchEffects([
+      // init state of counters is empty at the moment so not here
       mapEffect(counterInit.effect, counterMessage1),
       mapEffect(counterInit.effect, counterMessage2)
     ]),
