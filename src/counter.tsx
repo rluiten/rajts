@@ -8,7 +8,10 @@ export type IMessage = string
 export type IState = number
 
 export function initWithCount(state: IState): INext<IState, IMessage> {
-  return { state }
+  return {
+    effect: _ => console.log('_____ init with'),
+    state
+  }
 }
 
 export function isCountHigh(state: IState) {
@@ -16,7 +19,10 @@ export function isCountHigh(state: IState) {
 }
 
 export const counter: IProgram<IState, IMessage, ReactView> = {
-  init: { state: 0 },
+  init: {
+    effect: _ => console.log('_____ init  def'),
+    state: 0
+  },
   update(message, state) {
     if (message === 'increment') {
       return { state: state + 1 }

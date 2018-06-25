@@ -25,6 +25,11 @@ export type View<TState, TMessage, TView = void> = (
   dispatch: Dispatch<TMessage>
 ) => TView
 
+export type Update<TState, TMessage> = (
+  message: TMessage,
+  state: TState
+) => INext<TState, TMessage>
+
 /**
  * TView generic parameter is for view library independence.
  *
@@ -33,7 +38,7 @@ export type View<TState, TMessage, TView = void> = (
  */
 export interface IProgram<TState, TMessage, TView = void> {
   init: INext<TState, TMessage>
-  update: (message: TMessage, state: TState) => INext<TState, TMessage>
+  update: Update<TState, TMessage>
   view: View<TState, TMessage, TView>
   done?: (state: TState) => void
 }

@@ -1,24 +1,18 @@
 import { Dispatch, Effect } from './raj'
 
-export function mapEffect<TIn, TOut>(
-  effect: Effect<TIn> | undefined,
-  map: (message: TIn | undefined) => TOut
+export function mapEffect<TMessageIn, TMessageOut>(
+  effect: Effect<TMessageIn> | undefined,
+  map: (message: TMessageIn | undefined) => TMessageOut
 ) {
-  return !effect
-    ? undefined
-    : (dispatch: Dispatch<TOut>) => {
+  return effect
+    ? (dispatch: Dispatch<TMessageOut>) =>
         effect(message => dispatch(map(message)))
-      }
+    : undefined
 }
 
 export function batchEffects<TMessage>(
   effects: Array<Effect<TMessage> | undefined>
 ) {
-  return function _batchEffects(dispatch: Dispatch<TMessage>) {
-    return effects.map(effect => {
-      if (effect) {
-        return effect(dispatch)
-      }
-    })
-  }
+  return (dispatch: Dispatch<TMessage>) =>
+    effects.map(effect => (effect ? effect(dispatch) : undefined))
 }

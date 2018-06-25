@@ -3,14 +3,14 @@ import counter, {
   IMessage as ICounterMessage,
   IState as ICounterState
 } from './counter'
+import { arrayAppend, arrayAssign, arrayTruncate } from './immutable'
 import { Dispatch, Effect, INext, IProgram } from './raj'
 import { batchEffects, mapEffect } from './raj-compose'
 import { ReactView } from './raj-react'
 
 /**
  * Nest counters inside our control
- * Have 2 counters and make second counter control
- * how many extra counters are added.
+ * Have 2 counters and make second counter set number of counters.
  */
 
 /**
@@ -73,8 +73,9 @@ const countersMessage = (index: number) => (
 
 const counterInit = counter.init
 
-// when increment counterMessage2, fire default and 'adjustCounters'
-function doNormalEffectAndAddCounter({
+// Normal counterMessage2 effect
+// And 'adjustCounters' affect to modify our counters
+function CounterMessage2EffectAndAdjustCounters({
   state,
   effect
 }: INext<ICounterState, ICounterMessage>): Effect<IMessage> {
@@ -92,7 +93,7 @@ function doNormalEffectAndAddCounter({
 const counterNest: IProgram<IState, IMessage, ReactView> = {
   init: {
     effect: batchEffects([
-      // init state of counters is empty at the moment so not here
+      // init state of counters is empty at the moment so no init
       mapEffect(counterInit.effect, counterMessage1),
       mapEffect(counterInit.effect, counterMessage2)
     ]),
@@ -103,43 +104,51 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
     }
   },
   update(message, state) {
+    // used to improve type checking of typescript (still need 2.9.2)
+    let next: INext<IState, IMessage>
+
     if (message.kind === 'counterMessage1') {
       const result = counter.update(message.data, state.counter1)
-      return {
+      next = {
         effect: mapEffect(result.effect, counterMessage1),
         state: { ...state, counter1: result.state }
       }
-    }
-    if (message.kind === 'counterMessage2') {
+    } else if (message.kind === 'counterMessage2') {
       const result = counter.update(message.data, state.counter2)
-      return {
-        effect: doNormalEffectAndAddCounter(result),
+      next = {
+        effect: CounterMessage2EffectAndAdjustCounters(result),
         state: { ...state, counter2: result.state }
       }
-    }
-    if (message.kind === 'adjustCounters') {
-      if (message.count === state.counters.length) {
-        return { state }
+    } else if (message.kind === 'adjustCounters') {
+      const currentLength = state.counters.length
+      if (message.count === currentLength) {
+        next = { state }
+      } else {
+        const initEffects: Array<Effect<IMessage> | undefined> = []
+        for (let i = currentLength; i < message.count; ++i) {
+          initEffects.push(mapEffect(counterInit.effect, countersMessage(i)))
+        }
+        const addCount = message.count - currentLength
+        const counters =
+          addCount < 0
+            ? arrayTruncate(state.counters, message.count)
+            : arrayAppend(state.counters, counterInit.state, addCount)
+        next = {
+          effect: batchEffects(initEffects),
+          state: { ...state, counters }
+        }
       }
-      // updating immutable style, not sure that matters for raj, but may assist React long term
-      const addCount = message.count - state.counters.length
-      const newCounters =
-        addCount < 0
-          ? state.counters.slice(0, message.count)
-          : [...state.counters, ...Array(addCount).fill(counterInit.state)]
-      return {
-        state: { ...state, counters: newCounters }
-      }
-    }
-    if (message.kind === 'countersMessage') {
+    } else if (message.kind === 'countersMessage') {
       const result = counter.update(message.data, state.counters[message.index])
-      state.counters[message.index] = result.state // TODO remove state mutate ?
-      return {
+      const counters = arrayAssign(state.counters, message.index, result.state)
+      next = {
         effect: mapEffect(result.effect, countersMessage(message.index)),
-        state: { ...state, counters: state.counters }
+        state: { ...state, counters }
       }
+    } else {
+      next = { state }
     }
-    return { state }
+    return next
   },
   view(state, dispatch) {
     return (
@@ -154,25 +163,32 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
           dispatch(counterMessage2(message))
         )}
         <p>The list of counters.</p>
-        {state.counters.map((counterState, index) => (
-          <div key={index}>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Index {index} </td>
-                  <td>
-                    {counter.view(counterState, message =>
-                      dispatch(countersMessage(index)(message))
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ))}
+        {renderCounters(dispatch, state.counters)}
       </div>
     )
   }
+}
+
+function renderCounters(
+  dispatch: Dispatch<IMessage>,
+  counters: ICounterState[]
+) {
+  return counters.map((counterState, index) => (
+    <div key={index}>
+      <table>
+        <tbody>
+          <tr>
+            <td>Index {index} </td>
+            <td>
+              {counter.view(counterState, message =>
+                dispatch(countersMessage(index)(message))
+              )}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  ))
 }
 
 export default counterNest
