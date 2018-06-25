@@ -6,14 +6,23 @@ import { Dispatch, IProgram, runtime, View } from './raj'
  */
 export type ReactView = JSX.Element | null
 
-export function program<TProps, TState, TMessage>(
+// Is there real value in the Component parameter ?
+// Means we can get behavior from it, useful ? minimal i think.
+
+export function program<TProps extends object, TState, TMessage>(
+  Component: React.ComponentClass<TProps>,
   createApp: (props: TProps) => IProgram<TState, TMessage, ReactView>
 ) {
-  interface IRajReactState {
-    state: TState | undefined
-  }
+  // interface IRajReactState {
+  //   state: TState | undefined
+  // }
 
-  return class RajProgram extends React.Component<TProps, IRajReactState> {
+  return class RajProgram extends Component {
+    // React.Component<TProps, IRajReactState> {
+
+    // another way to set state types that cant via Component argument ? bad idea ?
+    public state: { state: TState | undefined } 
+
     private _view: View<TState, TMessage, ReactView>
     private _killProgram: (() => void) | undefined
     private _dispatch: Dispatch<TMessage>
