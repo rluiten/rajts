@@ -11,13 +11,14 @@ export function mapEffect<TIn, TOut>(
       }
 }
 
-export function dispatchEffect<TMessageIn, TMessageOut>(
-  dispatch: Dispatch<TMessageOut>,
-  effect: Effect<TMessageIn> | undefined,
-  adapter: (m: TMessageIn) => TMessageOut
+export function batchEffects<TMessage>(
+  effects: Array<Effect<TMessage> | undefined>
 ) {
-  const newEffect = mapEffect(effect, adapter)
-  if (newEffect) {
-    newEffect(dispatch)
+  return function _batchEffects(dispatch: Dispatch<TMessage>) {
+    return effects.map(effect => {
+      if (effect) {
+        return effect(dispatch)
+      }
+    })
   }
 }

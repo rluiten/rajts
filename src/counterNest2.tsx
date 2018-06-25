@@ -4,7 +4,7 @@ import counter, {
   IState as ICounterState
 } from './counter'
 import { Dispatch, Effect, INext, IProgram } from './raj'
-import { dispatchEffect, mapEffect } from './raj-compose'
+import { batchEffects, mapEffect } from './raj-compose'
 import { ReactView } from './raj-react'
 
 /**
@@ -73,15 +73,6 @@ const countersMessage = (index: number) => (
 
 const counterInit = counter.init
 
-/**
- * Initialise each contained program.
- */
-const initCounterNestEffect = (dispatch: Dispatch<IMessage>) => {
-  dispatchEffect(dispatch, counterInit.effect, counterMessage1)
-  dispatchEffect(dispatch, counterInit.effect, counterMessage2)
-  // init state of counters is empty at the moment so nothing to do here
-}
-
 // when increment counterMessage2, fire default and 'adjustCounters'
 function doNormalEffectAndAddCounter({
   state,
@@ -100,7 +91,10 @@ function doNormalEffectAndAddCounter({
 
 const counterNest: IProgram<IState, IMessage, ReactView> = {
   init: {
-    effect: initCounterNestEffect,
+    effect: batchEffects([
+      mapEffect(counterInit.effect, counterMessage1),
+      mapEffect(counterInit.effect, counterMessage2)
+    ]),
     state: {
       counter1: counterInit.state,
       counter2: counterInit.state,
@@ -163,14 +157,14 @@ const counterNest: IProgram<IState, IMessage, ReactView> = {
           <div key={index}>
             <table>
               <tbody>
-              <tr>
-                <td>Index {index} </td>
-                <td>
-                  {counter.view(counterState, message =>
-                    dispatch(countersMessage(index)(message))
-                  )}
-                </td>
-              </tr>
+                <tr>
+                  <td>Index {index} </td>
+                  <td>
+                    {counter.view(counterState, message =>
+                      dispatch(countersMessage(index)(message))
+                    )}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

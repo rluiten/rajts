@@ -3,8 +3,8 @@ import counterNest, {
   IMessage as ICN2Message,
   IState as ICN2State
 } from './counterNest2'
-import { Dispatch, IProgram } from './raj'
-import { dispatchEffect, mapEffect } from './raj-compose'
+import { IProgram } from './raj'
+import { batchEffects, mapEffect } from './raj-compose'
 import { ReactView } from './raj-react'
 
 export interface IState {
@@ -32,10 +32,10 @@ const styleBox = {
 
 const counterNest2Nest: IProgram<IState, IMessage, ReactView> = {
   init: {
-    effect: (dispatch: Dispatch<IMessage>) => {
-      dispatchEffect(dispatch, init.effect, counter1)
-      dispatchEffect(dispatch, init.effect, counter2)
-    },
+    effect: batchEffects([
+      mapEffect(init.effect, counter1),
+      mapEffect(init.effect, counter2)
+    ]),
     state: {
       counter1: init.state,
       counter2: init.state
