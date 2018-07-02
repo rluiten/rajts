@@ -1,21 +1,14 @@
-import * as React from 'react'
 import { Dispatch, IProgram, runtime, View } from './raj'
 
 /**
- * Use this when creating raj programs using raj-react.
+ * TView is present to allow for more general use with different
+ * versions of React and possibly Preact which shares API.
+ * Reference: https://github.com/andrejewski/raj-react/issues/19
  */
-export type ReactView = JSX.Element | null
-
-// Is there real value in the Component parameter ?
-// Means we can get behavior from it, useful ? minimal i think.
-
-export function program<TProps extends object, TState, TMessage>(
+export function program<TProps extends object, TState, TMessage, TView>(
   Component: React.ComponentClass<TProps>,
-  createApp: (props: TProps) => IProgram<TState, TMessage, ReactView>
+  createApp: (props: TProps) => IProgram<TState, TMessage, TView>
 ) {
-  // interface IRajReactState {
-  //   state: TState | undefined
-  // }
 
   return class RajProgram extends Component {
     // React.Component<TProps, IRajReactState> {
@@ -23,7 +16,7 @@ export function program<TProps extends object, TState, TMessage>(
     // another way to set state types that cant via Component argument ? bad idea ?
     public state: { state: TState | undefined } 
 
-    private _view: View<TState, TMessage, ReactView>
+    private _view: View<TState, TMessage, TView>
     private _killProgram: (() => void) | undefined
     private _dispatch: Dispatch<TMessage>
 

@@ -6,12 +6,13 @@ import counter, {
 import { arrayAppend, arrayAssign, arrayTruncate } from './immutable'
 import { Dispatch, Effect, INext, IProgram } from './raj'
 import { batchEffects, mapEffect } from './raj-compose'
-import { ReactView } from './raj-react'
 
 /**
  * Nest counters inside our control
  * Have 2 counters and make second counter set number of counters.
  */
+
+export type ReactView = JSX.Element | null
 
 /**
  * State

@@ -30,6 +30,8 @@ export type Update<TState, TMessage> = (
   state: TState
 ) => INext<TState, TMessage>
 
+export type Done<TState> = (state: TState) => void
+
 /**
  * TView generic parameter is for view library independence.
  *
@@ -40,7 +42,7 @@ export interface IProgram<TState, TMessage, TView = void> {
   init: INext<TState, TMessage>
   update: Update<TState, TMessage>
   view: View<TState, TMessage, TView>
-  done?: (state: TState) => void
+  done?: Done<TState>
 }
 
 export function runtime<TState, TMessage = void, TView = void>({
@@ -84,6 +86,7 @@ export function runtime<TState, TMessage = void, TView = void>({
   }
 }
 
+/* -- explore idea -
 //
 // Consider a class definition, instead of object with fields any benefits ?
 // maybe benefit is can define local helper methods on class for something like
@@ -117,3 +120,4 @@ export function stateEffect<TState>(
 ): Next<TState> {
   return { kind: 'stateEffect', state, effect }
 }
+*/

@@ -7,7 +7,8 @@ import counter, {
 } from './counter'
 import { IProgram } from './raj'
 import { mapEffect } from './raj-compose'
-import { ReactView } from './raj-react'
+
+export type ReactView = JSX.Element | null
 
 export interface IState {
   counter: ICounterState

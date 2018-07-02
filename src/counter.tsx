@@ -1,7 +1,8 @@
 import * as React from 'react'
 import CounterComponent from './CounterComponent'
 import { INext, IProgram } from './raj'
-import { ReactView } from './raj-react'
+
+export type ReactView = JSX.Element | null
 
 export type IMessage = string
 
@@ -29,7 +30,9 @@ export const counter: IProgram<IState, IMessage, ReactView> = {
     }
     return { state: state - 1 }
   },
-  view: (state, dispatch) => <CounterComponent {...{ state, dispatch }} />
+  view(state, dispatch) {
+    return <CounterComponent {...{ state, dispatch }} />
+  }
 }
 
 export default counter

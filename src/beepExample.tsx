@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Dispatch, IProgram } from './raj'
-import { ReactView } from './raj-react'
+
+export type ReactView = JSX.Element | null
 
 type IMessage = string
 type IState = number

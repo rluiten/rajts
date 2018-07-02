@@ -5,7 +5,8 @@ import counterNest, {
 } from './counterNest2'
 import { IProgram } from './raj'
 import { batchEffects, mapEffect } from './raj-compose'
-import { ReactView } from './raj-react'
+
+export type ReactView = JSX.Element | null
 
 export interface IState {
   counter1: ICN2State
