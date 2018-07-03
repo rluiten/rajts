@@ -26,35 +26,47 @@ export interface ISubscribe<TMessage> {
   cancel: () => void
 }
 
-export interface IProps<TState, TProgramMessage, TView, TRouterMessage> {
+// For now just assume next state, message can be any
+// - what do i lose this way ?
+export type GetRouteProgram<TRouterMessage, TView> = (
+  router: TRouterMessage
+) => IProgram<any, any, TView>
+
+export interface ISpaProps<TState, TProgramMessage, TView, TRouterMessage> {
   router: IRajRouter<TRouterMessage>
-  // For now just assume next state, message can be any
-  // - what do i lose this way ?
-  getRouteProgram: (route: TRouterMessage) => IProgram<any, any, TView>
+  getRouteProgram: GetRouteProgram<TRouterMessage, TView>
   initialProgram: IProgram<TState, TProgramMessage, TView>
   // errorProgram
   // containerView
 }
 
+export interface ISpaState<
+  TProgramState,
+  TProgramMessage,
+  TView,
+  TRouterMessage
+> {
+  currentProgram: IProgram<TProgramState, TProgramMessage, TView>
+  isTransitioning: boolean
+  // programKey: string | undefined
+  programState: TProgramState
+  routerCancel: () => void
+  routerEmitter: Effect<TRouterMessage> | undefined
+}
+
+export type ISpaMessage<TProgramMessage, TRouterMessage> =
+  | IGetRoute<TRouterMessage>
+  | IGetProgram<TProgramMessage>
+  | IProgramMsg<TProgramMessage>
+
 export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
   router,
   getRouteProgram,
   initialProgram
-}: IProps<TProgramState, TProgramMessage, TView, TRouterMessage>) {
-  //
-  interface ISpaState {
-    currentProgram: IProgram<TProgramState, TProgramMessage, TView>
-    isTransitioning: boolean
-    // programKey: string | undefined
-    programState: TProgramState
-    routerCancel: () => void
-    routerEmitter: Effect<TRouterMessage> | undefined
-  }
-  type ISpaMessage =
-    | IGetRoute<TRouterMessage>
-    | IGetProgram<TProgramMessage>
-    | IProgramMsg<TProgramMessage>
-  type MapMessage<TIn> = (data: TIn) => ISpaMessage
+}: ISpaProps<TProgramState, TProgramMessage, TView, TRouterMessage>) {
+  type MapMessage<TIn> = (
+    data: TIn
+  ) => ISpaMessage<TProgramMessage, TRouterMessage>
   const getRoute: MapMessage<TRouterMessage> = route => ({
     kind: 'GetRoute',
     route
@@ -71,7 +83,12 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
   const init = (() => {
     const { state: initState, effect: initEffect } = initialProgram.init
     const { effect: routerEffect, cancel: routerCancel } = router.subscribe()
-    const state: ISpaState = {
+    const state: ISpaState<
+      TProgramState,
+      TProgramMessage,
+      TView,
+      TRouterMessage
+    > = {
       currentProgram: initialProgram,
       isTransitioning: false,
       // programKey: undefined,
@@ -88,7 +105,12 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
 
   // TODO what is next state/message being any costing me ?
   function transitionToProgram(
-    currentState: ISpaState,
+    currentState: ISpaState<
+      TProgramState,
+      TProgramMessage,
+      TView,
+      TRouterMessage
+    >,
     newProgram: IProgram<any, any, TView>
   ): INext<any, any> {
     const { state: newProgramState, effect: newProgramEffect } = newProgram.init
@@ -105,7 +127,10 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
     return { state, effect }
   }
 
-  const update: Update<ISpaState, ISpaMessage> = (message, state) => {
+  const update: Update<
+    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>,
+    ISpaMessage<TProgramMessage, TRouterMessage>
+  > = (message, state) => {
     // exhaustive ? never ? or force return type etc.
     switch (message.kind) {
       case 'GetRoute':
@@ -113,17 +138,9 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
         const nextProgram = getRouteProgram(message.route)
         // todo support keyed programs, need wrapper type for programs or extra field ?
         // todo support getRoutePrograms returning promise, dont think use isPromise though.
-
         // NOTE dont have programKey or routeEmitter yet.
+        console.log(JSON.stringify({ message, nextProgram }))
         return transitionToProgram(state, nextProgram)
-      // break
-
-      // GetProgram does not get used until Promises are used in GetRoute....
-      // case 'GetProgram':
-      //   // NOTE dont have isTransitioning so state unchanged.
-      //   const a = message.data;
-      //   console.log(message.kind, message.data)
-      //   break
 
       case 'ProgramMsg':
         console.log(message.kind, message.data)
@@ -134,20 +151,22 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
         const newState = { ...state, programModel: newSubState }
         const effect = mapEffect(newEffect, programMsg)
         return { state: newState, effect }
-      // break
     }
-    // if (message.kind === 'GetRoute') {
-
-    // }
     return { state }
   }
 
-  const view: View<ISpaState, ISpaMessage, TView> = (spaState, dispatch) => {
+  const view: View<
+    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>,
+    ISpaMessage<TProgramMessage, TRouterMessage>,
+    TView
+  > = (spaState, dispatch) => {
     const { programState } = spaState
     return initialProgram.view(programState, x => dispatch(getProgram(x)))
   }
 
-  const done: Done<ISpaState> = state => {
+  const done: Done<
+    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>
+  > = state => {
     console.log('done called')
     const subDone = state.currentProgram.done
     if (subDone) {
@@ -159,7 +178,11 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
     }
   }
 
-  return { done, init, update, view } as IProgram<ISpaState, ISpaMessage, TView>
+  return { done, init, update, view } as IProgram<
+    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>,
+    ISpaMessage<TProgramMessage, TRouterMessage>,
+    TView
+  >
 }
 
 export default spa

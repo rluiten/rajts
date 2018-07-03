@@ -2,7 +2,7 @@ import { IRajRouter } from './raj-spa'
 
 export type IHashRouterMessage = string
 
-// hash-change router as shown in from raj doc.
+// hash-change router as found in from raj doc.
 export const router: IRajRouter<IHashRouterMessage> = {
   subscribe() {
     let listener: () => void
@@ -18,3 +18,5 @@ export const router: IRajRouter<IHashRouterMessage> = {
     }
   }
 }
+
+export default router

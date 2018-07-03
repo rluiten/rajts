@@ -1,10 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { program } from './raj-react'
-import { spa } from './raj-spa'
 import { traceProgram } from './raj-trace'
-
-console.log({ spa })
 
 export type ReactView = JSX.Element | null
 
@@ -71,3 +68,15 @@ const Nest2Nest = program<{}, ICN2NState, ICN2NMessage, ReactView>(
   _props => counterNest2Nest
 )
 ReactDOM.render(<Nest2Nest />, document.getElementById('nest2nest'))
+
+// Consider for Spa, that program state is Any, program message is Any ? // chop down types.
+import { IHashRouterMessage } from './raj-hash-router'
+import { ISpaMessage, ISpaState, spa } from './raj-spa'
+import { INoMessage, INoState, mySpa } from './spa-example'
+const MySpa = program<
+  {},
+  ISpaState<INoState, INoMessage, ReactView, IHashRouterMessage>,
+  ISpaMessage<INoMessage, IHashRouterMessage>,
+  ReactView
+>(React.Component, _props => spa(mySpa))
+ReactDOM.render(<MySpa />, document.getElementById('spa-example'))
