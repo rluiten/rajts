@@ -160,8 +160,8 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
     ISpaMessage<TProgramMessage, TRouterMessage>,
     TView
   > = (spaState, dispatch) => {
-    const { programState } = spaState
-    return initialProgram.view(programState, x => dispatch(getProgram(x)))
+    const { programState, currentProgram } = spaState
+    return currentProgram.view(programState, x => dispatch(getProgram(x)))
   }
 
   const done: Done<
