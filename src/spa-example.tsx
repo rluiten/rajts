@@ -8,8 +8,8 @@ export type INoState = number
 export type INoMessage = string | undefined
 
 function displayProgram(
-  content: ReactView,
-  n: number
+  n: number,
+  content: ReactView
 ): IProgram<any, any, ReactView> {
   return {
     init: { state: n },
@@ -20,9 +20,37 @@ function displayProgram(
   }
 }
 
-const pageNotFoundProgram = displayProgram(<div>Page Not Found</div>, 1)
-const homeProgram = displayProgram(<div>Home Page Content</div>, 2)
+function Menu() {
+  return (
+    <>
+      <a href="#users/">Go to Users</a> <a href="#home/">Go to Home</a>{' '}
+      <a href="#">Go to Root</a>
+    </>
+  )
+}
+
+const pageNotFoundProgram = displayProgram(
+  1,
+  <div>
+    <div>
+      <Menu />
+    </div>
+    Page Not Found
+  </div>
+)
+
+const homeProgram = displayProgram(
+  2,
+  <div>
+    <div>
+      <Menu />
+    </div>
+    Home Page Content
+  </div>
+)
+
 const initialProgram = displayProgram(
+  3,
   <div>
     Initial Program Content{' '}
     <button
@@ -31,12 +59,13 @@ const initialProgram = displayProgram(
         console.log('click button')
       }}
     >
+      <div>
+        <Menu />
+      </div>
       Button Text
-    </button>{' '}
-    <a href="#users/">Go to Users</a> <a href="#home/">Go to Home</a>{' '}
-    <a href="#">Go to Root</a>
-  </div>,
-  3
+    </button>
+    <Menu />
+  </div>
 )
 
 type IUserState = number
@@ -45,7 +74,14 @@ const userProgram: IProgram<IUserState, IUserMessage, ReactView> = {
   init: { state: 11 },
   update: (_message, state) => ({ state }),
   view(_state, _dispatch) {
-    return <div>User Program Content</div>
+    return (
+      <div>
+        <div>
+          <Menu />
+        </div>
+        User Program Content
+      </div>
+    )
   }
 }
 
