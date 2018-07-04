@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { program } from './raj-react'
-import { traceProgram } from './raj-trace'
 
 export type ReactView = JSX.Element | null
 
@@ -35,6 +34,7 @@ import counterNest, {
   IMessage as ICNMessage,
   IState as ICNState
 } from './counterNest'
+import { traceProgram } from './raj-trace'
 const Nest = program<{}, ICNState, ICNMessage, ReactView>(
   React.Component,
   _props =>

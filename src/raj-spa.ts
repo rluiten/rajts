@@ -1,6 +1,5 @@
 import { Done, Effect, INext, IProgram, Update, View } from './raj'
 import { batchEffects, mapEffect } from './raj-compose'
-// import { mapEffect } from './raj-compose'
 
 export interface IGetRoute<TMessage> {
   kind: 'GetRoute'
@@ -64,9 +63,10 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
   getRouteProgram,
   initialProgram
 }: ISpaProps<TProgramState, TProgramMessage, TView, TRouterMessage>) {
-  type MapMessage<TIn> = (
-    data: TIn
-  ) => ISpaMessage<TProgramMessage, TRouterMessage>
+  //
+  type IState = ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>
+  type IMessage = ISpaMessage<TProgramMessage, TRouterMessage>
+  type MapMessage<TIn> = (data: TIn) => IMessage
   const getRoute: MapMessage<TRouterMessage> = route => ({
     kind: 'GetRoute',
     route
@@ -81,14 +81,10 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
   })
 
   const init = (() => {
+    console.log('raj-spa init')
     const { state: initState, effect: initEffect } = initialProgram.init
     const { effect: routerEffect, cancel: routerCancel } = router.subscribe()
-    const state: ISpaState<
-      TProgramState,
-      TProgramMessage,
-      TView,
-      TRouterMessage
-    > = {
+    const state: IState = {
       currentProgram: initialProgram,
       isTransitioning: false,
       // programKey: undefined,
@@ -105,14 +101,10 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
 
   // TODO what is next state/message being any costing me ?
   function transitionToProgram(
-    currentState: ISpaState<
-      TProgramState,
-      TProgramMessage,
-      TView,
-      TRouterMessage
-    >,
+    currentState: IState,
     newProgram: IProgram<any, any, TView>
   ): INext<any, any> {
+    console.log('raj-spa transitionToProgram')
     const { state: newProgramState, effect: newProgramEffect } = newProgram.init
     const state = {
       ...currentState,
@@ -127,11 +119,9 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
     return { state, effect }
   }
 
-  const update: Update<
-    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>,
-    ISpaMessage<TProgramMessage, TRouterMessage>
-  > = (message, state) => {
+  const update: Update<IState, IMessage> = (message, state) => {
     // exhaustive ? never ? or force return type etc.
+    console.log('raj-spa update')
     switch (message.kind) {
       case 'GetRoute':
         console.log(message.kind, message.route)
@@ -155,19 +145,14 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
     return { state }
   }
 
-  const view: View<
-    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>,
-    ISpaMessage<TProgramMessage, TRouterMessage>,
-    TView
-  > = (spaState, dispatch) => {
+  const view: View<IState, IMessage, TView> = (spaState, dispatch) => {
     const { programState, currentProgram } = spaState
+    console.log('raj-spa view state', JSON.stringify(programState))
     return currentProgram.view(programState, x => dispatch(getProgram(x)))
   }
 
-  const done: Done<
-    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>
-  > = state => {
-    console.log('done called')
+  const done: Done<IState> = state => {
+    console.log('raj-spa done')
     const subDone = state.currentProgram.done
     if (subDone) {
       subDone(state.programState)
@@ -178,11 +163,7 @@ export function spa<TProgramState, TProgramMessage, TView, TRouterMessage>({
     }
   }
 
-  return { done, init, update, view } as IProgram<
-    ISpaState<TProgramState, TProgramMessage, TView, TRouterMessage>,
-    ISpaMessage<TProgramMessage, TRouterMessage>,
-    TView
-  >
+  return { done, init, update, view } as IProgram<IState, IMessage, TView>
 }
 
 export default spa

@@ -6,83 +6,37 @@ import { GetRouteProgram, ISpaProps } from './raj-spa'
 export type ReactView = JSX.Element | null
 export type INoState = number
 export type INoMessage = string | undefined
+type ViewProgram = IProgram<any, any, ReactView>
 
-function displayProgram(
-  n: number,
-  content: ReactView
-): IProgram<any, any, ReactView> {
+function viewProgram(n: number, view: ReactView): ViewProgram {
   return {
     init: { state: n },
     update: (_message: any, state: any) => ({ state }),
-    view(_state, _dispatch) {
-      return content
-    }
+    view: (_state, _dispatch) => view
   }
 }
 
-function Menu() {
-  return (
-    <>
-      <a href="#users/">Go to Users</a> <a href="#home/">Go to Home</a>{' '}
+const Menu: React.SFC<{}> = props => (
+  <div>
+    <div className="nav-menu">
+      <a href="#users/">Go to Users</a>
+      <a href="#home/">Go to Home</a>
       <a href="#">Go to Root</a>
-    </>
-  )
-}
-
-const pageNotFoundProgram = displayProgram(
-  1,
-  <div>
-    <div>
-      <Menu />
     </div>
-    Page Not Found
+    {props.children}
   </div>
 )
 
-const homeProgram = displayProgram(
-  2,
-  <div>
-    <div>
-      <Menu />
-    </div>
-    Home Page Content
-  </div>
-)
-
-const initialProgram = displayProgram(
-  3,
-  <div>
-    Initial Program Content{' '}
-    <button
-      onClick={() => {
-        // tslint:disable-next-line:jsx-no-lambda
-        console.log('click button')
-      }}
-    >
-      <div>
-        <Menu />
-      </div>
-      Button Text
-    </button>
-    <Menu />
-  </div>
-)
+const pageNotFound = viewProgram(1, <Menu>Page Not Found</Menu>)
+const homeProgram = viewProgram(2, <Menu>Home Page Content</Menu>)
+const initialProgram = viewProgram(3, <Menu>Initial Program Content</Menu>)
 
 type IUserState = number
 type IUserMessage = string | undefined
 const userProgram: IProgram<IUserState, IUserMessage, ReactView> = {
-  init: { state: 11 },
+  init: { state: 4 },
   update: (_message, state) => ({ state }),
-  view(_state, _dispatch) {
-    return (
-      <div>
-        <div>
-          <Menu />
-        </div>
-        User Program Content
-      </div>
-    )
-  }
+  view: (_state, _dispatch) => <Menu>User Program Content</Menu>
 }
 
 const getRouteProgram: GetRouteProgram<
@@ -99,7 +53,7 @@ const getRouteProgram: GetRouteProgram<
     return userProgram
   }
 
-  return pageNotFoundProgram
+  return pageNotFound
 }
 
 export const mySpa: ISpaProps<
